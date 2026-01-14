@@ -1,11 +1,35 @@
+"""
+Builds the UI Intermediate Model (UIM) from screenshots.
+"""
 
 import os
-from uim.models import Screen, ScreenState, Component
+from uim.models import Screen, ScreenState, UIComponent
 from vision.ocr import extract_text
-def build_screen(name, images):
-    states=[]
-    for img in images:
-        state=os.path.basename(img).replace('.png','')
-        comps=[Component(label=t,state=state) for t in extract_text(img) if 'HDR' in t]
-        states.append(ScreenState(state, comps))
-    return Screen(name, states, {})
+
+
+def build_screen(screen_name: str, image_paths: list) -> Screen:
+    states = []
+
+    for image_path in image_paths:
+        state_name = os.path.basename(image_path).replace(".png", "")
+        texts = extract_text(image_path)
+
+        components = []
+        for t in texts:
+            # Simple, explicit heuristic (replace with vision model later)
+            if "HDR" in t.upper():
+                components.append(
+                    UIComponent(label="HDR", state=state_name)
+                )
+
+        states.append(
+            ScreenState(
+                name=state_name,
+                components=components
+            )
+        )
+
+    return Screen(
+        name=screen_name,
+        states=states
+    )

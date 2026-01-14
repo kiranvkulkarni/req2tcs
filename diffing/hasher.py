@@ -1,4 +1,11 @@
+import json
+import hashlib
 
-import json,hashlib
-def stable_hash(obj):
-    return hashlib.sha256(json.dumps(obj,sort_keys=True).encode()).hexdigest()
+
+def stable_hash(obj) -> str:
+    """
+    Deterministic, order-independent hash.
+    """
+    return hashlib.sha256(
+        json.dumps(obj, sort_keys=True, ensure_ascii=True).encode("utf-8")
+    ).hexdigest()

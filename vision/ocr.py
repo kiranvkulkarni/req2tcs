@@ -1,6 +1,18 @@
+"""
+OCR abstraction using Tesseract.
+"""
 
-import pytesseract
 from PIL import Image
-def extract_text(image_path):
-    text = pytesseract.image_to_string(Image.open(image_path))
-    return [t.strip() for t in text.splitlines() if t.strip()]
+import pytesseract
+from typing import List
+
+
+def extract_text(image_path: str) -> List[str]:
+    image = Image.open(image_path)
+    raw_text = pytesseract.image_to_string(image)
+
+    return [
+        line.strip()
+        for line in raw_text.splitlines()
+        if line.strip()
+    ]

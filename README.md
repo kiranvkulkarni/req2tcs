@@ -1,11 +1,14 @@
 
-AI Test Generation – Full Source
+AI TestGen – Production v1 (Complete Source)
 
-Requirements:
-- Python 3.10+
-- Windows 11
-- Tesseract OCR
-- Ollama (Llama 3)
+This is a complete, readable, production-quality reference implementation.
 
-pip install pillow pytesseract openpyxl requests
-python pipeline.py
+Features:
+- Screenshot-based UI ingestion
+- OCR using Tesseract
+- UI Intermediate Model (UIM)
+- On-prem LLM semantics (Ollama + Llama 3)
+- Incremental diffing (hash-based)
+- Gherkin + Excel test generation
+
+Target: Windows 11, Python 3.10+
