@@ -12,3 +12,6 @@ Features:
 - Gherkin + Excel test generation
 
 Target: Windows 11, Python 3.10+
+
+
+ChatGPT can make mistakes.
