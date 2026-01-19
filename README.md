@@ -263,3 +263,103 @@ Prefer correctness and robustness over speed
 Build incrementally on existing architecture
 
 Never downgrade solution quality
+
+
+
+===========================
+
+# Project Role & Objective
+You are a Principal Software Architect and Full-Stack Developer. Your task is to build an **"Intelligent QA Ingestion Engine."**
+
+**Objective:** Create an end-to-End system that ingests UI requirements (provided as ~1000 screenshots of Figma User Flow/State Machine diagrams), detects changes from previous versions (Deltas), generates standard Gherkin (Cucumber) test cases, and presents them for Human-in-the-Loop (HITL) verification via a Web UI.
+
+**Domain:** Smartphone Application QA (Application-Agnostic).
+
+---
+
+## **1. Core Functional Requirements**
+
+### **A. Input Layer (The Vision Pipeline)**
+1.  **Input Source:** A folder containing ~1000 `.png` images.
+    * *Content:* These images are NOT just static UI screens; they are **Flow Diagrams** (State Machines) containing screens, transition arrows, decision diamonds, and annotation text.
+2.  **Processing:**
+    * Use a Multimodal LLM (e.g., GPT-4o-Vision) to parse these diagrams.
+    * **CRITICAL:** You must extract not just text, but the **Logic Flow** (Source State -> Action -> Target State).
+3.  **Scalability:** The system must handle batch processing of high-volume images asynchronously.
+
+### **B. The "Delta Intelligence" Engine (Versioning)**
+1.  **State Persistence:** The system must maintain a "Knowledge Graph" or structured JSON representation of the *previous* run (Version N-1).
+2.  **Change Detection:**
+    * Do NOT rely on pixel-diffing (brittle).
+    * Implement **Semantic Delta Detection**: Compare the *extracted logic* of Version N vs. Version N-1.
+    * Identify three categories: **New Flows**, **Modified Flows**, and **Deleted Flows**.
+    * *Constraint:* Generate Gherkin test cases **ONLY** for New and Modified flows to save processing time.
+
+### **C. Output Generation (The Test Architect)**
+1.  **Format:** Pure Gherkin (`.feature` files).
+2.  **Syntax:** Must follow strict Cucumber standards (`Feature`, `Scenario`, `Given`, `When`, `Then`).
+3.  **Traceability:** Every Scenario must include a tag referencing the Source Image ID (e.g., `@Source:img_204.png`).
+
+### **D. Human-in-the-Loop (HITL) Interface**
+1.  **Web UI:** Build a clean, responsive Web Dashboard (React/Next.js or Streamlit).
+2.  **Workflow:**
+    * **Left Panel:** Displays the Source Screenshot (with zoom/pan capability).
+    * **Right Panel:** Displays the AI-generated Gherkin code (editable).
+    * **Action:** "Approve & Save" or "Regenerate" buttons.
+3.  **Final Output:** Once approved, the Gherkin is saved to a persistent `tests/` directory or Git repo.
+
+---
+
+## **2. Technical Architecture & Tech Stack**
+
+* **Backend:** Python (FastAPI) - for high-performance async processing.
+* **Vision/LLM:** LangChain + OpenAI GPT-4o (or interchangeable model provider).
+* **Database:** * *Vector DB (Chroma/FAISS):* To store semantic embeddings of requirements for RAG context.
+    * *Metadata Store (SQLite/PostgreSQL):* To store file hashes, version history, and approval status.
+* **Frontend:** React (Vite) or Streamlit (for rapid prototyping).
+* **Queue:** Redis/Celery (Optional but recommended) for managing the 1000-image workload.
+
+---
+
+## **3. Expert Best Practices & Constraints (Strict Adherence)**
+
+1.  **Graph-Based Internal Model:**
+    * Before generating Gherkin, convert the parsed images into an internal **Directed Graph** (Nodes = Screens, Edges = User Actions). This ensures we can traverse paths to generate "End-to-End" scenarios, not just single-screen tests.
+    
+2.  **Self-Healing Parser:**
+    * If the Vision Model output is malformed (invalid JSON), implement a **Retry Mechanism** with a "Correction Prompt" automatically.
+
+3.  **Context Awareness:**
+    * The engine must allow an optional `app_name` argument. If provided, retrieve "Global Definitions" (e.g., "Login is always via Biometrics for this app") from the Vector DB to enrich the test cases.
+
+4.  **Token Optimization:**
+    * Do not send 1000 images to the LLM at once. Implement **Smart Batching** or cluster images by filename similarity before processing.
+
+5.  **Defensive Gherkin:**
+    * Generated steps must be generic enough to be automated later (e.g., use "When I tap the 'Login' button" instead of "When I tap the button at x,y coordinates").
+
+---
+
+## **4. Execution Plan (Step-by-Step for Code Generation)**
+
+**Phase 1: Backend Setup & Vision Parsing**
+* Set up FastAPI.
+* Create the `ImageProcessor` class that sends images to GPT-4o and returns a structured JSON `FlowObject` (State, Action, Next_State).
+
+**Phase 2: Delta Logic**
+* Implement `VersionManager`.
+* Logic: `Current_Flow_Hash` vs `Previous_Flow_Hash`. Return only diffs.
+
+**Phase 3: Gherkin Generator**
+* Implement `GherkinBuilder`.
+* Logic: Convert `FlowObjects` into `Given/When/Then` strings.
+
+**Phase 4: Web UI**
+* Build the dashboard to visualize `{Image} <-> {Gherkin}` side-by-side.
+
+**Phase 5: Integration**
+* Connect API endpoints to Frontend.
+
+---
+
+**Generate the project structure and the core Python code for Phase 1 (Vision Parsing) and Phase 2 (Delta Logic) to start.**
